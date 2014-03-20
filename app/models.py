@@ -1,4 +1,5 @@
 from app import db
+from flask import json
 
 class Restaurant(db.Model):
   id = db.Column(db.Integer, primary_key = True)
@@ -9,7 +10,16 @@ class Restaurant(db.Model):
   dishes = db.relationship('Dish', backref = 'suppiler', lazy = 'dynamic')
    
   def __repr__(self):
-    return "Restaurant <%r>" % self.name
+    return "Restaurant <%r>" % self.name.encode('utf-8')
+
+  def to_dict(self):
+    return {
+      "id": self.id,
+      "name": self.name, 
+      "telephone": self.telephone, 
+      "address": self.address,
+      "rating": self.rating
+    }
 
 class Dish(db.Model):
   id = db.Column(db.Integer, primary_key = True)
