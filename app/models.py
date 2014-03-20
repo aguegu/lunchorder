@@ -3,8 +3,8 @@ from flask import json
 
 class Restaurant(db.Model):
   id = db.Column(db.Integer, primary_key = True)
-  name = db.Column(db.String(32), index = True, unique = True)
-  telephone = db.Column(db.String(64), index = True)
+  name = db.Column(db.String(32), index = True, unique = True, nullable = False)
+  telephone = db.Column(db.String(64), index = True, nullable = False)
   address = db.Column(db.String(128), default = '') 
   rating = db.Column(db.SmallInteger, default = 0)
   dishes = db.relationship('Dish', backref = 'suppiler', lazy = 'dynamic')
