@@ -48,7 +48,21 @@ def delete_restaurant(restaurant_id):
   else:
     abort(404)
   
+@app.route('/restaurants/<int:restaurant_id>', methods=['PUT'])
+def update_restaurant(restaurant_id):
+  r = request.json
+  print r
+  if not r or 'name' not in r or type(r['name']) is not unicode or len(r['name'].strip()) < 2:
+    abort(400)
 
+  restaurant = Restaurant.query.get(restaurant_id)
+  if restaurant:
+    restaurant.name = r['name'].strip().lower()
+    db.session.commit()
+    return json.dumps({'result': 'successed'})
+  else:
+    abort(404)
+ 
 @app.errorhandler(404)
 def not_found(error):
   return make_response(json.dumps({'error': 'not found'}), 404)
