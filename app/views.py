@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from app import app, models, db
-from flask import json, abort, make_response, request
+from flask import json, abort, make_response, request, render_template, url_for
 from models import Restaurant
 
 @app.route('/')
 @app.route('/index')
 def index():
-  return 'Lunch Order'
+  return render_template('index.html')
 
-@app.route('/restaurants', methods=['GET'])
+@app.route('/api/restaurants', methods=['GET'])
 def get_restaurants():
-  return json.dumps([m.to_dict() for m in Restaurant.query.all()], ensure_ascii = False)
+  return json.dumps({"restaurants": [to_public(m.to_dict()) for m in Restaurant.query.all()]}, ensure_ascii = False)
 
 
-@app.route('/restaurants/<int:id>', methods=['GET'])
+@app.route('/api/restaurants/<int:id>', methods=['GET'])
 def get_restaurant(id):
   r = Restaurant.query.get(id)
   if r:
-    return json.dumps(r.to_dict(), ensure_ascii = False)
+    return json.dumps(to_public(r.to_dict()), ensure_ascii = False)
   else:
     abort(404)
 
-@app.route('/restaurants', methods=['POST'])
+@app.route('/api/restaurants', methods=['POST'])
 def create_restaurant():
   r = request.json
   if not r or 'name' not in r or type(r['name']) is not unicode or len(r['name'].strip()) < 2:
@@ -30,7 +30,7 @@ def create_restaurant():
 
   name = r['name'].strip().lower()
 
-  if Restaurant.query.filter_by(name = name).count(): 
+  if Restaurant.query.filter_by(name = name).count():
     abort(409)
   else:
     restaurant = Restaurant(**r)
@@ -38,7 +38,7 @@ def create_restaurant():
     db.session.commit()
     return json.dumps(restaurant.to_dict(), ensure_ascii = False)
 
-@app.route('/restaurants/<int:restaurant_id>', methods=['DELETE'])
+@app.route('/api/restaurants/<int:restaurant_id>', methods=['DELETE'])
 def delete_restaurant(restaurant_id):
   r = Restaurant.query.get(restaurant_id)
   if r:
@@ -47,8 +47,8 @@ def delete_restaurant(restaurant_id):
     return json.dumps({'result': 'successed'})
   else:
     abort(404)
-  
-@app.route('/restaurants/<int:restaurant_id>', methods=['PUT'])
+
+@app.route('/api/restaurants/<int:restaurant_id>', methods=['PUT'])
 def update_restaurant(restaurant_id):
   r = request.json
   print r
@@ -62,7 +62,17 @@ def update_restaurant(restaurant_id):
     return json.dumps({'result': 'successed'})
   else:
     abort(404)
- 
+
 @app.errorhandler(404)
 def not_found(error):
   return make_response(json.dumps({'error': 'not found'}), 404)
+
+def to_public(restaurant_from):
+  restaurant_to = {}
+  for field in restaurant_from:
+    if field == 'id':
+      restaurant_to['uri'] = url_for('get_restaurant', id = restaurant_from['id'], _external = True)
+    else:
+      restaurant_to[field] = restaurant_from[field]
+
+  return restaurant_to
