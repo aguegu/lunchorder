@@ -54,9 +54,10 @@ def update_restaurant(restaurant_id):
   if restaurant:
     r = request.json
 
-    if r['op'].strip().lower() == 'rankup':
+    op = r['op'].strip().lower()
+    if op == 'rankup':
       restaurant.rating += 1
-    elif r['op'].strip().lower() == 'rankdown':
+    elif op == 'rankdown':
       restaurant.rating -= 1
 
     db.session.commit()
