@@ -44,6 +44,8 @@
     <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
 
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+
         function RestaurantsViewModel() {
             var self = this;
             self.restaurants_uri = '/api/restaurants';
@@ -78,21 +80,24 @@
             }
             self.rankUp = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
-                    self.updateRestaurant(restaurant, res.restaurant);
+                    var i = self.restaurants.indexOf(restaurant);
+                    self.updateRestaurant(i, res.restaurant);
+                    socket.emit('rank event', {'data': 'rank up'});
                 });
             }
             self.rankDown = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
-                    self.updateRestaurant(restaurant, res.restaurant);
+                    var i = self.restaurants.indexOf(restaurant);
+                    self.updateRestaurant(i, res.restaurant);
+                    socket.emit('rank event', {'data': 'rank down'});
                 });
             }
 
-            self.updateRestaurant = function(restaurant_local, restaurant_resp) {
-                var i = self.restaurants.indexOf(restaurant_local);
-                self.restaurants()[i].uri(restaurant_resp.uri);
-                self.restaurants()[i].title(restaurant_resp.title);
-                self.restaurants()[i].telephone(restaurant_resp.telephone);
-                self.restaurants()[i].rating(restaurant_resp.rating);
+            self.updateRestaurant = function(index, restaurant_resp) {
+                self.restaurants()[index].uri(restaurant_resp.uri);
+                self.restaurants()[index].title(restaurant_resp.title);
+                self.restaurants()[index].telephone(restaurant_resp.telephone);
+                self.restaurants()[index].rating(restaurant_resp.rating);
             }
 
             self.ajax(self.restaurants_uri, 'GET').done(function(data) {
@@ -108,7 +113,6 @@
         }
         ko.applyBindings(new RestaurantsViewModel(), $('#main')[0]);
 
-        var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
         socket.on('my response', function(msg) {
             $('#log').append('<br>Received on: ' + msg.data);
         });

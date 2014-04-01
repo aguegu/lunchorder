@@ -86,6 +86,10 @@ def background_thread():
 
 @sock.on('connect', namespace='/test')
 def test_connect():
-    print "connected"
+  print "connected"
 #    emit('my response', {'data': 'Connected'})
 
+@sock.on('rank event', namespace='/test')
+def test_message(message):
+  print message['data']
+  emit('my response', {'data': message['data']}, namespace='/test', broadcast=True)
