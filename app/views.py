@@ -52,14 +52,13 @@ def delete_restaurant(restaurant_id):
 def update_restaurant(restaurant_id):
   r = request.json
   print r
-  if not r or 'name' not in r or type(r['name']) is not unicode or len(r['name'].strip()) < 2:
-    abort(400)
 
   restaurant = Restaurant.query.get(restaurant_id)
   if restaurant:
-    restaurant.name = r['name'].strip().lower()
+    #restaurant.title = r['title'].strip().lower()
+    restaurant.rating = r['rating']
     db.session.commit()
-    return json.dumps({'result': 'successed'})
+    return json.dumps({'restaurant': to_public(r)})
   else:
     abort(404)
 
