@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from app import app, models, db
+from app import app, sock, models, db
 from flask import json, abort, make_response, request, render_template, url_for
 from models import Restaurant
+from datetime import datetime
+import time
+from flask.ext.socketio import emit
 
 @app.route('/')
 @app.route('/index')
@@ -74,3 +77,15 @@ def to_public(restaurant_from):
   restaurant_to['uri'] = url_for('get_restaurant', id = restaurant_from['id'], _external = True)
   del(restaurant_to['id'])
   return restaurant_to
+
+def background_thread():
+  while True:
+    t = str(datetime.now())
+    sock.emit('my response', {'data': t}, namespace='/test')
+    time.sleep(10)
+
+@sock.on('connect', namespace='/test')
+def test_connect():
+    print "connected"
+#    emit('my response', {'data': 'Connected'})
+

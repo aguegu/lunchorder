@@ -7,6 +7,7 @@
   <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
   <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
   <script src="{{ url_for('static', filename='knockout-min.js') }}"></script>
+  <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -39,69 +40,80 @@
         </table>
         <button data-bind="click: beginAdd" class="btn">Add Restaurant</button>
     </div>
-    <script type="text/javascript">
-    function RestaurantsViewModel() {
-        var self = this;
-        self.restaurants_uri = '/api/restaurants';
-        self.restaurants = ko.observableArray();
+    <div id="log" class="container"></div>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
 
-        self.ajax = function(uri, method, data) {
-            var request = {
-                url: uri,
-                type: method,
-                contentType: "application/json",
-                accepts: "application/json",
-                cache: false,
-                dataType: 'json',
-                data: JSON.stringify(data),
-                error: function(jqXHR) {
-                    console.log("ajax error " + jqXHR.status);
-                }
-            };
-            return $.ajax(request);
-        }
+        function RestaurantsViewModel() {
+            var self = this;
+            self.restaurants_uri = '/api/restaurants';
+            self.restaurants = ko.observableArray();
 
-        self.beginAdd = function() {
-            alert("Add");
-        }
-        self.beginEdit = function(restaurant) {
-            alert("Edit: " + restaurants.title());
-        }
-        self.remove = function(restaurant) {
-            self.ajax(restaurant.uri(), 'DELETE').done(function() {
-              self.restaurants.remove(restaurant);
-            });
-        }
-        self.rankUp = function(restaurant) {
-            self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
-                self.updateRestaurant(restaurant, res.restaurant);
-            });
-        }
-        self.rankDown = function(restaurant) {
-            self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
-                self.updateRestaurant(restaurant, res.restaurant);
-            });
-        }
+            self.ajax = function(uri, method, data) {
+                var request = {
+                    url: uri,
+                    type: method,
+                    contentType: "application/json",
+                    accepts: "application/json",
+                    cache: false,
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+                };
+                return $.ajax(request);
+            }
 
-        self.updateRestaurant = function(restaurant_local, restaurant_resp) {
-            var i = self.restaurants.indexOf(restaurant_local);
-            self.restaurants()[i].uri(restaurant_resp.uri);
-            self.restaurants()[i].title(restaurant_resp.title);
-            self.restaurants()[i].telephone(restaurant_resp.telephone);
-            self.restaurants()[i].rating(restaurant_resp.rating);
-        }
-
-        self.ajax(self.restaurants_uri, 'GET').done(function(data) {
-            for (var i = 0; i < data.restaurants.length; i++) {
-                self.restaurants.push({
-                    uri: ko.observable(data.restaurants[i].uri),
-                    title: ko.observable(data.restaurants[i].title),
-                    telephone: ko.observable(data.restaurants[i].telephone),
-                    rating: ko.observable(data.restaurants[i].rating)
+            self.beginAdd = function() {
+                alert("Add");
+            }
+            self.beginEdit = function(restaurant) {
+                alert("Edit: " + restaurants.title());
+            }
+            self.remove = function(restaurant) {
+                self.ajax(restaurant.uri(), 'DELETE').done(function() {
+                    self.restaurants.remove(restaurant);
                 });
             }
+            self.rankUp = function(restaurant) {
+                self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
+                    self.updateRestaurant(restaurant, res.restaurant);
+                });
+            }
+            self.rankDown = function(restaurant) {
+                self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
+                    self.updateRestaurant(restaurant, res.restaurant);
+                });
+            }
+
+            self.updateRestaurant = function(restaurant_local, restaurant_resp) {
+                var i = self.restaurants.indexOf(restaurant_local);
+                self.restaurants()[i].uri(restaurant_resp.uri);
+                self.restaurants()[i].title(restaurant_resp.title);
+                self.restaurants()[i].telephone(restaurant_resp.telephone);
+                self.restaurants()[i].rating(restaurant_resp.rating);
+            }
+
+            self.ajax(self.restaurants_uri, 'GET').done(function(data) {
+                for (var i = 0; i < data.restaurants.length; i++) {
+                    self.restaurants.push({
+                        uri: ko.observable(data.restaurants[i].uri),
+                        title: ko.observable(data.restaurants[i].title),
+                        telephone: ko.observable(data.restaurants[i].telephone),
+                        rating: ko.observable(data.restaurants[i].rating)
+                    });
+                }
+            });
+        }
+        ko.applyBindings(new RestaurantsViewModel(), $('#main')[0]);
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+        socket.on('my response', function(msg) {
+            $('#log').append('<br>Received on: ' + msg.data);
         });
-    }
-    ko.applyBindings(new RestaurantsViewModel(), $('#main')[0]);
+
+        $('#log').append('<br>' + document.domain + ':' + location.port);
+    });
     </script>
 </body>
