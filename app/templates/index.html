@@ -82,14 +82,14 @@
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
                     var i = self.restaurants.indexOf(restaurant);
                     self.updateRestaurant(i, res.restaurant);
-                    socket.emit('rank event', {'data': 'rank up'});
+                    //socket.emit('rank event', {'data': 'rank up'});
                 });
             }
             self.rankDown = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
                     var i = self.restaurants.indexOf(restaurant);
                     self.updateRestaurant(i, res.restaurant);
-                    socket.emit('rank event', {'data': 'rank down'});
+                    //socket.emit('rank event', {'data': 'rank down'});
                 });
             }
 

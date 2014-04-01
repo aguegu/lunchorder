@@ -64,6 +64,7 @@ def update_restaurant(restaurant_id):
       restaurant.rating -= 1
 
     db.session.commit()
+    emit('my response', {'data': op}, namespace='/test', broadcast=True)
     return json.dumps({'restaurant': to_public(restaurant.to_dict())})
   else:
     abort(404)
