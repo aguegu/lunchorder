@@ -50,15 +50,17 @@ def delete_restaurant(restaurant_id):
 
 @app.route('/api/restaurants/<int:restaurant_id>', methods=['PUT'])
 def update_restaurant(restaurant_id):
-  r = request.json
-  print r
-
   restaurant = Restaurant.query.get(restaurant_id)
   if restaurant:
-    #restaurant.title = r['title'].strip().lower()
-    restaurant.rating = r['rating']
+    r = request.json
+
+    if r['op'].strip().lower() == 'rankup':
+      restaurant.rating += 1
+    elif r['op'].strip().lower() == 'rankdown':
+      restaurant.rating -= 1
+
     db.session.commit()
-    return json.dumps({'restaurant': to_public(r)})
+    return json.dumps({'restaurant': to_public(restaurant.to_dict())})
   else:
     abort(404)
 
@@ -67,11 +69,7 @@ def not_found(error):
   return make_response(json.dumps({'error': 'not found'}), 404)
 
 def to_public(restaurant_from):
-  restaurant_to = {}
-  for field in restaurant_from:
-    if field == 'id':
-      restaurant_to['uri'] = url_for('get_restaurant', id = restaurant_from['id'], _external = True)
-    else:
-      restaurant_to[field] = restaurant_from[field]
-
+  restaurant_to = restaurant_from.copy()
+  restaurant_to['uri'] = url_for('get_restaurant', id = restaurant_from['id'], _external = True)
+  del(restaurant_to['id'])
   return restaurant_to
