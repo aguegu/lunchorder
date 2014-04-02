@@ -82,14 +82,14 @@
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
                     var i = self.restaurants.indexOf(restaurant);
                     self.updateRestaurant(i, res.restaurant);
-                    //socket.emit('rank event', {'data': 'rank up'});
+                    socket.emit('update', {'uri': restaurant.uri()});
                 });
             }
             self.rankDown = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
                     var i = self.restaurants.indexOf(restaurant);
                     self.updateRestaurant(i, res.restaurant);
-                    //socket.emit('rank event', {'data': 'rank down'});
+                    socket.emit('update', {'uri': restaurant.uri()});
                 });
             }
 
@@ -101,20 +101,28 @@
             }
 
             self.ajax(self.restaurants_uri, 'GET').done(function(data) {
-                for (var i = 0; i < data.restaurants.length; i++) {
+                data.restaurants.forEach(function(r){
                     self.restaurants.push({
-                        uri: ko.observable(data.restaurants[i].uri),
-                        title: ko.observable(data.restaurants[i].title),
-                        telephone: ko.observable(data.restaurants[i].telephone),
-                        rating: ko.observable(data.restaurants[i].rating)
-                    });
-                }
+                        uri: ko.observable(r.uri),
+                        title: ko.observable(r.title),
+                        telephone: ko.observable(r.telephone),
+                        rating: ko.observable(r.rating)
+                    });                    
+                });                
             });
         }
         ko.applyBindings(new RestaurantsViewModel(), $('#main')[0]);
 
         socket.on('my response', function(msg) {
             $('#log').append('<br>Received on: ' + msg.data);
+        });
+
+        socket.on('refresh', function(msg) {
+            console.log(msg);
+            console.log(msg.uri);
+            self.ajax(self.restaurants_uri, 'GET').done(function(data) {
+                console.log(data.restaurant);
+            });
         });
 
         $('#log').append('<br>' + document.domain + ':' + location.port);

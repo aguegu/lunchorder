@@ -21,7 +21,7 @@ def get_restaurants():
 def get_restaurant(id):
   r = Restaurant.query.get(id)
   if r:
-    return json.dumps(to_public(r.to_dict()), ensure_ascii = False)
+    return json.dumps({"restaurant": to_public(r.to_dict())}, ensure_ascii = False)
   else:
     abort(404)
 
@@ -64,7 +64,6 @@ def update_restaurant(restaurant_id):
       restaurant.rating -= 1
 
     db.session.commit()
-    emit('my response', {'data': op}, namespace='/test', broadcast=True)
     return json.dumps({'restaurant': to_public(restaurant.to_dict())})
   else:
     abort(404)
@@ -90,7 +89,7 @@ def test_connect():
   print "connected"
 #    emit('my response', {'data': 'Connected'})
 
-@sock.on('rank event', namespace='/test')
+@sock.on('update', namespace='/test')
 def test_message(message):
-  print message['data']
-  emit('my response', {'data': message['data']}, namespace='/test', broadcast=True)
+  print message['uri']
+  emit('refresh', {'uri': message['uri']}, namespace='/test', broadcast=True)
