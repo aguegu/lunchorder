@@ -64,7 +64,8 @@ def update_restaurant(restaurant_id):
       restaurant.rating -= 1
 
     db.session.commit()
-    return json.dumps({'restaurant': to_public(restaurant.to_dict())})
+#    return json.dumps({'restaurant': to_public(restaurant.to_dict())})
+    return json.dumps({'result': 'successed'})
   else:
     abort(404)
 

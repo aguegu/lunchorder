@@ -18,7 +18,7 @@
     <div id="main" class="container">
         <table class="table table-striped">
             <tr><th>Restaurant</th><th>Rating</th><th>Options</th></tr>
-            <!-- ko foreach: restaurants -->
+            <!-- ko foreach: lst -->
             <tr>
                 <td>
                     <p><b data-bind="text: title"></b></p>
@@ -48,8 +48,8 @@
 
         function RestaurantsViewModel() {
             var self = this;
-            self.restaurants_uri = '/api/restaurants';
-            self.restaurants = ko.observableArray();
+            self.base_uri = '/api/restaurants';
+            self.lst = ko.observableArray();
 
             self.ajax = function(uri, method, data) {
                 var request = {
@@ -71,57 +71,60 @@
                 alert("Add");
             }
             self.beginEdit = function(restaurant) {
-                alert("Edit: " + restaurants.title());
+                alert("Edit: " + restaurant.title());
             }
             self.remove = function(restaurant) {
                 self.ajax(restaurant.uri(), 'DELETE').done(function() {
-                    self.restaurants.remove(restaurant);
+                    self.lst.remove(restaurant);
                 });
             }
             self.rankUp = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
-                    var i = self.restaurants.indexOf(restaurant);
-                    self.updateRestaurant(i, res.restaurant);
+                    var i = self.lst.indexOf(restaurant);
                     socket.emit('update', {'uri': restaurant.uri()});
                 });
             }
             self.rankDown = function(restaurant) {
                 self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
-                    var i = self.restaurants.indexOf(restaurant);
-                    self.updateRestaurant(i, res.restaurant);
+                    var i = self.lst.indexOf(restaurant);
                     socket.emit('update', {'uri': restaurant.uri()});
                 });
             }
 
-            self.updateRestaurant = function(index, restaurant_resp) {
-                self.restaurants()[index].uri(restaurant_resp.uri);
-                self.restaurants()[index].title(restaurant_resp.title);
-                self.restaurants()[index].telephone(restaurant_resp.telephone);
-                self.restaurants()[index].rating(restaurant_resp.rating);
+            self.update = function(index, restaurant) {
+//                self.restaurants()[index].uri(restaurant.uri);
+                self.lst()[index].title(restaurant.title);
+                self.lst()[index].telephone(restaurant.telephone);
+                self.lst()[index].rating(restaurant.rating);
             }
 
-            self.ajax(self.restaurants_uri, 'GET').done(function(data) {
+            self.ajax(self.base_uri, 'GET').done(function(data) {
                 data.restaurants.forEach(function(r){
-                    self.restaurants.push({
+                    self.lst.push({
                         uri: ko.observable(r.uri),
                         title: ko.observable(r.title),
                         telephone: ko.observable(r.telephone),
                         rating: ko.observable(r.rating)
-                    });                    
-                });                
+                    });
+                });
             });
         }
-        ko.applyBindings(new RestaurantsViewModel(), $('#main')[0]);
+
+        restaurants = new RestaurantsViewModel();
+        ko.applyBindings(restaurants, $('#main')[0]);
 
         socket.on('my response', function(msg) {
             $('#log').append('<br>Received on: ' + msg.data);
         });
 
         socket.on('refresh', function(msg) {
-            console.log(msg);
-            console.log(msg.uri);
-            self.ajax(self.restaurants_uri, 'GET').done(function(data) {
-                console.log(data.restaurant);
+            restaurants.ajax(msg.uri, 'GET').done(function(data) {
+                for (i = 0; i < restaurants.lst().length; i++) {
+                    if (restaurants.lst()[i].uri() == data.restaurant.uri) {
+                        restaurants.update(i, data.restaurant);
+                        break;
+                    }
+                };
             });
         });
 
