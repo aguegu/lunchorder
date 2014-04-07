@@ -35,7 +35,7 @@
                         <button data-bind="click: $parent.rankDown" class="btn btn-default">rank down</button>
                     </div>
                 </td>
-            </tr>
+            </tr>            
             <!-- /ko -->
         </table>
         <button data-bind="click: beginAdd" class="btn">Add Restaurant</button>
@@ -79,20 +79,13 @@
                 });
             }
             self.rankUp = function(restaurant) {
-                self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" }).done(function(res){
-                    var i = self.lst.indexOf(restaurant);
-                    socket.emit('update', {'uri': restaurant.uri()});
-                });
+                self.ajax(restaurant.uri(), 'PUT', { "op": "rankup" });
             }
             self.rankDown = function(restaurant) {
-                self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" }).done(function(res){
-                    var i = self.lst.indexOf(restaurant);
-                    socket.emit('update', {'uri': restaurant.uri()});
-                });
+                self.ajax(restaurant.uri(), 'PUT', { "op": "rankdown" });
             }
 
             self.update = function(index, restaurant) {
-//                self.restaurants()[index].uri(restaurant.uri);
                 self.lst()[index].title(restaurant.title);
                 self.lst()[index].telephone(restaurant.telephone);
                 self.lst()[index].rating(restaurant.rating);

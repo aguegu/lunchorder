@@ -64,7 +64,7 @@ def update_restaurant(restaurant_id):
       restaurant.rating -= 1
 
     db.session.commit()
-#    return json.dumps({'restaurant': to_public(restaurant.to_dict())})
+    sock.emit('refresh', {'uri': '/api/restaurants/%d' % restaurant_id}, namespace='/test')
     return json.dumps({'result': 'successed'})
   else:
     abort(404)
@@ -89,8 +89,3 @@ def background_thread():
 def test_connect():
   print "connected"
 #    emit('my response', {'data': 'Connected'})
-
-@sock.on('update', namespace='/test')
-def test_message(message):
-  print message['uri']
-  emit('refresh', {'uri': message['uri']}, namespace='/test', broadcast=True)
