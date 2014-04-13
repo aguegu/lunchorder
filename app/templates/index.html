@@ -124,14 +124,29 @@
                 self.lst()[index].rating(restaurant.rating);
             }
 
+            self.add = function(restaurant) {
+                self.ajax(self.tasksURI, 'POST', restaurant).done(function(r) {
+                    self.lst.push({
+                        uri: ko.observable(data.task.uri),
+                        title: ko.observable(data.task.title),
+                        description: ko.observable(data.task.description),
+
+                    });
+                });
+            }
+
+            self.append = function(r) {
+                self.lst.push({
+                    uri: ko.observable(r.uri),
+                    title: ko.observable(r.title),
+                    telephone: ko.observable(r.telephone),
+                    rating: ko.observable(r.rating)
+                });
+            }
+
             self.ajax(self.base_uri, 'GET').done(function(data) {
                 data.restaurants.forEach(function(r){
-                    self.lst.push({
-                        uri: ko.observable(r.uri),
-                        title: ko.observable(r.title),
-                        telephone: ko.observable(r.telephone),
-                        rating: ko.observable(r.rating)
-                    });
+                    self.append(r);
                 });
             });
         }
@@ -151,6 +166,12 @@
                         break;
                     }
                 };
+            });
+        });
+
+        socket.on('append', function(msg) {
+            restaurants.ajax(msg.uri, 'GET').done(function(data) {
+                restaurants.append(data.restaurant);                
             });
         });
 

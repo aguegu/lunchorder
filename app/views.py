@@ -28,17 +28,21 @@ def get_restaurant(id):
 @app.route('/api/restaurants', methods=['POST'])
 def create_restaurant():
   r = request.json
-  if not r or 'name' not in r or type(r['name']) is not unicode or len(r['name'].strip()) < 2:
+  if not r or 'title' not in r or type(r['title']) is not unicode or len(r['title'].strip()) < 2:
     abort(400)
 
-  name = r['name'].strip().lower()
+  title = r['title'].strip().lower()
 
-  if Restaurant.query.filter_by(name = name).count():
+  if Restaurant.query.filter_by(title = title).count():
     abort(409)
   else:
     restaurant = Restaurant(**r)
     db.session.add(restaurant)
     db.session.commit()
+
+    restaurant = Restaurant.query.filter_by(title = title)[0]
+
+    sock.emit('append', {'uri': '/api/restaurants/%d' % restaurant.id}, namespace='/test')
     return json.dumps(restaurant.to_dict(), ensure_ascii = False)
 
 @app.route('/api/restaurants/<int:restaurant_id>', methods=['DELETE'])
