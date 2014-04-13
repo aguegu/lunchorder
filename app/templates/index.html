@@ -52,13 +52,13 @@
                         <div class="form-group">
                             <label for="restaurant_title" class="col-sm-2 control-label">Title</label>
                             <div class="col-sm-5">
-                                <input type="restaurant_title" class="form-control" id="add_restaurant_title" placeholder="title">
+                                <input data-bind="value: title" type="restaurant_title" class="form-control" id="add_restaurant_title" placeholder="title">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="restaurant_telephone" class="col-sm-2 control-label">Telephone</label>
                             <div class="col-sm-8">
-                                <input type="restaurant_telephone" class="form-control" id="add_restaurant_telephone" placeholder="telephone">
+                                <input data-bind="value: telephone"  type="restaurant_telephone" class="form-control" id="add_restaurant_telephone" placeholder="telephone">
                             </div>
                         </div>
                         <div class="form-group">
@@ -125,14 +125,7 @@
             }
 
             self.add = function(restaurant) {
-                self.ajax(self.tasksURI, 'POST', restaurant).done(function(r) {
-                    self.lst.push({
-                        uri: ko.observable(data.task.uri),
-                        title: ko.observable(data.task.title),
-                        description: ko.observable(data.task.description),
-
-                    });
-                });
+                self.ajax(self.base_uri, 'POST', restaurant);
             }
 
             self.append = function(r) {
@@ -151,8 +144,26 @@
             });
         }
 
+        function AddRestaurantViewModel() {
+            var self = this;
+            self.title = ko.observable();
+            self.telephone = ko.observable();
+ 
+            self.addRestaurant = function() {
+                $('#add').modal('hide');
+                restaurants.add({
+                    title: self.title(),
+                    telephone: self.telephone()
+                });
+                self.title("");
+                self.telephone("");
+            }
+        }
+
         restaurants = new RestaurantsViewModel();
+        restaurant_new = new AddRestaurantViewModel();
         ko.applyBindings(restaurants, $('#main')[0]);
+        ko.applyBindings(restaurant_new, $('#add')[0]);
 
         socket.on('my response', function(msg) {
             $('#log').append('<br>Received on: ' + msg.data);
