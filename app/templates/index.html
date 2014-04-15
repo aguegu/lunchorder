@@ -35,12 +35,12 @@
                         <button data-bind="click: $parent.rankDown" class="btn btn-default">rank down</button>
                     </div>
                 </td>
-            </tr>            
+            </tr>
             <!-- /ko -->
         </table>
         <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add">Add Restaurant</a>
     </div>
-    <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+    <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -66,7 +66,7 @@
                             <div class="col-sm-8">
                                 <input type="restaurant_address" class="form-control" id="add_restaurant_address" placeholder="address">
                             </div>
-                        </div>                        
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -102,7 +102,7 @@
                 };
                 return $.ajax(request);
             }
-            
+
             self.beginEdit = function(restaurant) {
                 alert("Edit: " + restaurant.title());
             }
@@ -148,7 +148,7 @@
             var self = this;
             self.title = ko.observable();
             self.telephone = ko.observable();
- 
+
             self.addRestaurant = function() {
                 $('#add').modal('hide');
                 restaurants.add({
@@ -182,7 +182,7 @@
 
         socket.on('append', function(msg) {
             restaurants.ajax(msg.uri, 'GET').done(function(data) {
-                restaurants.append(data.restaurant);                
+                restaurants.append(data.restaurant);
             });
         });
 

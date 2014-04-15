@@ -40,8 +40,7 @@ def create_restaurant():
     db.session.add(restaurant)
     db.session.commit()
 
-    restaurant = Restaurant.query.filter_by(title = title)[0]
-
+    db.session.refresh(restaurant)
     sock.emit('append', {'uri': '/api/restaurants/%d' % restaurant.id}, namespace='/test')
     return json.dumps(restaurant.to_dict(), ensure_ascii = False)
 
