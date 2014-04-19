@@ -171,12 +171,20 @@
 
         socket.on('refresh', function(msg) {
             restaurants.ajax(msg.uri, 'GET').done(function(data) {
-                for (i = 0; i < restaurants.lst().length; i++) {
-                    if (restaurants.lst()[i].uri() == data.restaurant.uri) {
-                        restaurants.update(i, data.restaurant);
-                        break;
-                    }
-                };
+                var match =  ko.utils.arrayFirst(restaurants.lst(), function(item) {
+                    return item.uri() == data.restaurant.uri;
+                });
+
+                console.log(match);
+
+                if (!match)
+                    restaurants.update(match.id(), data.restaurant);
+//                for (i = 0; i < restaurants.lst().length; i++) {
+                    // if (restaurants.lst()[i].uri() == data.restaurant.uri) {
+                    // restaurants.update(i, data.restaurant);
+                    // break;
+                    // }
+//                };
             });
         });
 
