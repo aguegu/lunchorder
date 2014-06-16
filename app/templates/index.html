@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>LunchOrder API Client Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='knockout-min.js') }}"></script>
-  <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
-</head>
-<body>
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+LunchOrder API Client Demo
+{% endblock %}
+
+{% block navbar %}
     <nav class="navbar navbar-default" role="navigation">
         <div class="container">
             <a class="navbar-brand" href="#">LunchOrder Client Demo</a>
         </div>
     </nav>
+{% endblock %}
+
+
+{% block content %}
     <div id="main" class="container">
         <table class="table table-striped">
             <tr><th>Restaurant</th><th>Rating</th><th>Options</th></tr>
@@ -77,6 +76,12 @@
         </div>
     </div>
     <div id="log" class="container"></div>
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script src="{{ url_for('static', filename='knockout-min.js') }}"></script>
+    <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
     <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
 
@@ -192,4 +197,5 @@
         $('#log').append('<br>' + document.domain + ':' + location.port);
     });
     </script>
-</body>
+
+{% endblock %}
